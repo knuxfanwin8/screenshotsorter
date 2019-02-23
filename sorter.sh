@@ -60,7 +60,7 @@ while true; do
     # Watch for new files
     for file in "$dirpath/"*; do
         if ! [ "$file" = "Screenshots" ] && ! [ -d "$file" ]; then
-                find "$file" -cnewer "$dirpath/lastcheck" -exec bash -c "mv ""$file"" ""$dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number"" && echo ""$((number + 1 ))"" > ""$dirpath/Screenshots/.lastnum"" && echo 'Photo saved.'"-- {} \;
+                find "$file" -cnewer "$dirpath/lastcheck" -exec bash -c "mv ""$file"" ""$dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number.png"" && echo ""$((number + 1 ))"" > ""$dirpath/Screenshots/.lastnum"" && echo 'Photo saved.'"-- {} \;
         fi
     done
     touch "$dirpath/lastcheck"

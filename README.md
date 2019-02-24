@@ -6,7 +6,7 @@ This is a small bash application designed to sort screenshots into folders named
 
 ## How to use it
 
-It is reccomended to run this script at startup. Most modern DEs allow you to do so from their settings. If you want to run it manually, type in the command as normal and follow it with an `&`, for example `sorter.sh 5 ~/Pictures` becomes `sorter.sh 5 ~/pictures &`. This will allow you to continue using your shell as normal.
+It is reccomended to run this script at startup. Most modern DEs allow you to do so from their settings. If you want to run it manually, type in the command as normal and follow it with an `&`, for example `sorter.sh 5 ~/Pictures` becomes `sorter.sh 5 ~/Pictures &`. This will allow you to continue using your shell as normal.
 
 ## Dependencies
 

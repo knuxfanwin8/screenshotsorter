@@ -60,11 +60,12 @@ while true; do
     # Watch for new files
     for file in "$dirpath/"*; do
         if ! [ "$file" = "Screenshots" ] && ! [ -d "$file" ]; then
-                find "$file" -cnewer "$dirpath/lastcheck" -exec bash -c "mv ""$file"" ""$dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number.png"" && echo ""$((number + 1 ))"" > ""$dirpath/Screenshots/.lastnum"" && echo 'Photo saved.'"-- {} \;
+                # Get file extention
+                extention="${file##*.}"
+                # Move the file
+                find "$file" -cnewer "$dirpath/lastcheck" -exec bash -c "mv ""$file"" ""$dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number.$extention"" && echo ""$((number + 1 ))"" > ""$dirpath/Screenshots/.lastnum"" && echo 'Photo saved.'"-- {} \;
         fi
     done
     touch "$dirpath/lastcheck"
     sleep "$secsleep"
 done
-
-echo "$number" # Because shellcheck just won't shut up.

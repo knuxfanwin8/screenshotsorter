@@ -47,7 +47,7 @@ fi
 
 
 # The actual loop
-if ! [ -e "$dirpath/lastcheck" ]; then touch "$dirpath/lastcheck"; fi
+if ! [ -e "$dirpath/Screenshots/.lastcheck" ]; then touch "$dirpath/Screenshots/.lastcheck"; fi
 while true; do
     # Create a folder for the current date and month, if necesary /
     if ! [ -e "$dirpath/Screenshots/$(date +%Y-%m)" ] 
@@ -63,9 +63,20 @@ while true; do
                 # Get file extention
                 extention="${file##*.}"
                 # Move the file
-                find "$file" -cnewer "$dirpath/lastcheck" -exec bash -c "mv ""$file"" ""$dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number.$extention"" && echo ""$((number + 1 ))"" > ""$dirpath/Screenshots/.lastnum"" && echo 'Photo saved.'"-- {} \;
+                if [ "$(find "$file" -cnewer "$dirpath/lastcheck")" ]; then
+                    mv "$file" "$dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number.$extention"
+                    echo "$((number + 1 ))" > "$dirpath/Screenshots/.lastnum"
+                    if [ -x "$(command -v kdialog)" ]; then 
+                        kdialog --title "Screenshot saved!" --passivepopup \
+"Saved as Screenshot_$number.$extention." 3
+                    elif [ -x "$(command -v zenity)" ]; then 
+                        zenity --notification --text="Saved as Screenshot_$number.$extention."
+                    else
+                        echo 'Photo saved.'
+                    fi
+                fi
         fi
     done
-    touch "$dirpath/lastcheck"
+    touch "$dirpath/Screenshots/.lastcheck"
     sleep "$secsleep"
 done

@@ -25,6 +25,28 @@ fi
 secsleep="$1"
 dirpath="$2"
 
+# Display warning if sleep time is 0
+if [ "$secsleep" = "0" ]; then
+    if [ -x "$(command -v kdialog)" ]; then 
+        if ! kdialog --title "Screenshot Sorter" --warningyesno "Using the refresh rate of 0 can be VERY resource intensive! Are you sure you want to continue?"; then exit 0; fi
+    elif [ -x "$(command -v zenity)" ]; then 
+       if ! zenity --warning --title="Screenshot Sorter" --text="Using the refresh rate of 0 can be VERY resource intensive! Are you sure you want to continue?"; then exit 0; fi
+    else
+        echo 'WARNING!!!'
+        echo 'Using the refresh rate of 0 can be VERY resource intensive! Are you sure you want to continue? [y/N]'
+        while ! [ "$choice" = "y" ] || ! [ "$choice" = "n" ] || ! [ "$choice" = "Y" ] || ! [ "$choice" = "N" ]; do
+        read -ren1 choice
+        if [ -z "$choice" ]; then exit 0; fi
+            case $choice in
+                "y") break;;
+                "n") exit 0;;
+                "Y") break;;
+                "N") exit 0;;
+            esac
+        done
+    fi
+fi
+
 # Check if the directory is valid
 if ! [ -e "$dirpath" ]; then
     echo "Screenshot directory does not exist!"
@@ -61,8 +83,7 @@ while true; do
                 echo "$((number + 1 ))" > "$dirpath/Screenshots/.lastnum"
                 # Show notification (or echo to the command line, depending on command availability)
                 if [ -x "$(command -v kdialog)" ]; then 
-                    kdialog --title "Screenshot saved!" --passivepopup \
-"Saved as Screenshot_$number.$extention." 3
+                    kdialog --title "Screenshot saved!" --passivepopup "Saved as Screenshot_$number.$extention." 3
                 elif [ -x "$(command -v zenity)" ]; then 
                     zenity --notification --text="Saved as Screenshot_$number.$extention."
                 else

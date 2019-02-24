@@ -2,7 +2,7 @@
 
 ## What does it do
 
-This is a small bash application designed to sort screenshots into folders named YYYY-MM, kinda like ShareX. It also renames the files to "Screenshot_(rising number)". That behaviour can be cut out by commenting out one line.
+This is a small bash application designed to sort screenshots into folders named YYYY-MM, kinda like ShareX. It also renames the files to "Screenshot_(rising number)".
 
 ## How to use it
 

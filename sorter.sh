@@ -77,7 +77,7 @@ while true; do
             # Get file extention
             extention="${file##*.}"
             # Move the file
-            if [ "$(find "$file" -cnewer "$dirpath/lastcheck")" ]; then
+            if [ "$(find "$file" -cnewer "$dirpath/Screenshots/.lastcheck")" ]; then
                 mv "$file" "$dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number.$extention"
                 # Update the last screenshot number
                 echo "$((number + 1 ))" > "$dirpath/Screenshots/.lastnum"

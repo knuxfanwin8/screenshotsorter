@@ -89,6 +89,10 @@ while true; do
                 else
                     echo 'Photo saved.'
                 fi
+				# Copy to clipboard (requires xclip)
+				if [ -x "$(command -v xclip)" ]; then
+					xclip -selection clipboard -t image/$extention -i $dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number.$extention 
+				fi
             fi
         fi
     done

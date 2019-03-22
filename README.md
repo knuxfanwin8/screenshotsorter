@@ -12,6 +12,7 @@ It is reccomended to run this script at startup. Most modern DEs allow you to do
 
 **kdialog** - for notifications (optional)
 **zenity** - alternative to kdialog, but kdialog is preffered (optional)
+**xclip** - for copying image to clipboard (optional)
 
 ### Exit codes
 

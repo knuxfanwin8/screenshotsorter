@@ -70,6 +70,7 @@ while true; do
     fi
     # Get last screenshot number 
     number="$(find . -type f -printf '%T@ %p\n' | sort -n | cut -f2- -d' ' | grep '_' | tail -n1 | cut -f2 -d'_' | cut -f1 -d'.')"
+	if [ -z "$number" ]; then number="0"; fi
     # Watch for new files
     for file in "$dirpath/"*; do
         if ! [ "$file" = "Screenshots" ] && ! [ -d "$file" ]; then
@@ -77,11 +78,11 @@ while true; do
             extention="${file##*.}"
             # Move the file
             if [ "$(find "$file" -cnewer "$dirpath/Screenshots/.lastcheck")" ]; then
-				let number++
+				(( number++ ))
                 mv "$file" "$dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number.$extention"
 				# Copy to clipboard (requires xclip)
 				if [ -x "$(command -v xclip)" ]; then
-					xclip -selection clipboard -t image/$extention -i $dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number.$extention 
+					xclip -selection clipboard -t image/"$extention" -i "$dirpath"/Screenshots/"$(date +%Y-%m)"/Screenshot_"$number"."$extention" 
 				fi
                 # Show notification (or echo to the command line, depending on command availability)
                 if [ -x "$(command -v kdialog)" ]; then 

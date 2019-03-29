@@ -69,8 +69,7 @@ while true; do
         mkdir "$dirpath/Screenshots/$(date +%Y-%m)" 
     fi
     # Get last screenshot number 
-    if ! [ -e "$dirpath/Screenshots/.lastnum" ]; then echo "0" > "$dirpath/Screenshots/.lastnum"; fi
-    number=$(cat "$dirpath/Screenshots/.lastnum") 
+    number="$(find . -type f -printf '%T@ %p\n' | sort -n | cut -f2- -d' ' | grep '_' | tail -n1 | cut -f2 -d'_' | cut -f1 -d'.')"
     # Watch for new files
     for file in "$dirpath/"*; do
         if ! [ "$file" = "Screenshots" ] && ! [ -d "$file" ]; then
@@ -78,9 +77,12 @@ while true; do
             extention="${file##*.}"
             # Move the file
             if [ "$(find "$file" -cnewer "$dirpath/Screenshots/.lastcheck")" ]; then
+				let number++
                 mv "$file" "$dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number.$extention"
-                # Update the last screenshot number
-                echo "$((number + 1 ))" > "$dirpath/Screenshots/.lastnum"
+				# Copy to clipboard (requires xclip)
+				if [ -x "$(command -v xclip)" ]; then
+					xclip -selection clipboard -t image/$extention -i $dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number.$extention 
+				fi
                 # Show notification (or echo to the command line, depending on command availability)
                 if [ -x "$(command -v kdialog)" ]; then 
                     kdialog --title "Screenshot saved!" --passivepopup "Saved as Screenshot_$number.$extention." 3
@@ -89,10 +91,6 @@ while true; do
                 else
                     echo 'Photo saved.'
                 fi
-				# Copy to clipboard (requires xclip)
-				if [ -x "$(command -v xclip)" ]; then
-					xclip -selection clipboard -t image/$extention -i $dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number.$extention 
-				fi
             fi
         fi
     done

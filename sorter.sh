@@ -69,7 +69,7 @@ while true; do
         mkdir "$dirpath/Screenshots/$(date +%Y-%m)" 
     fi
     # Get last screenshot number 
-    number="$(find . -type f -printf '%T@ %p\n' | sort -n | cut -f2- -d' ' | grep '_' | tail -n1 | cut -f2 -d'_' | cut -f1 -d'.')"
+    number="$(find $dirpath/Screenshots -type f -printf '%T@ %p\n' | sort -n | cut -f2- -d' ' | grep '_' | tail -n1 | cut -f2 -d'_' | cut -f1 -d'.')"
 	if [ -z "$number" ]; then number="0"; fi
     # Watch for new files
     for file in "$dirpath/"*; do

@@ -1,102 +1,62 @@
-#!/bin/bash
-
-#--------------------#
-#  ScreenshotSorter  #
-#                    #
-#   by knuxfanwin8   #
-#--------------------#
-
+#!/usr/bin/env bash
 usage="sorter.sh (refresh rate in seconds) (screenshot directory)"
 
-# Check if all arguments are supplied
-if [ -z "$*" ]; then
-    echo "No arguments supplied!"
-    echo "Usage: $usage" 
-    exit 1
-fi
+[[ -z "$1" ]] && echo "Usage: $usage" / exit 1
+[[ -z "$2" ]] && echo "Usage: $usage" / exit 2
+sleep="$1"
+rawdir="$2"
+screenpath="$rawdir/Screenshots"
 
-if [ -z "$2" ]; then
-    echo "No path supplied!"
-    echo "Usage: $usage"
-    exit 1
-fi
+command -v zenity &>/dev/null && gui="zenity"
+command -v kdialog &>/dev/null && gui="kdialog"
 
-# Assign the arguments to variables
-secsleep="$1"
-dirpath="$2"
+warn() {
+	echo "Warning: $*"
+	[[ "$gui" ]] && {
+		case $gui in
+			kdialog) kdialog --title "Warning" --error "$*";;
+			zenity) zenity --warning --title="Warning" --text="$*";;
+		esac
+	}
+}
 
-# Display warning if sleep time is 0
-if [ "$secsleep" = "0" ]; then
-    if [ -x "$(command -v kdialog)" ]; then 
-        if ! kdialog --title "Screenshot Sorter" --warningyesno "Using the refresh rate of 0 can be VERY resource intensive! Are you sure you want to continue?"; then exit 0; fi
-    elif [ -x "$(command -v zenity)" ]; then 
-       if ! zenity --warning --title="Screenshot Sorter" --text="Using the refresh rate of 0 can be VERY resource intensive! Are you sure you want to continue?"; then exit 0; fi
-    else
-        echo 'WARNING!!!'
-        echo 'Using the refresh rate of 0 can be VERY resource intensive! Are you sure you want to continue? [y/N]'
-        while ! [ "$choice" = "y" ] || ! [ "$choice" = "n" ] || ! [ "$choice" = "Y" ] || ! [ "$choice" = "N" ]; do
-        read -ren1 choice
-        if [ -z "$choice" ]; then exit 0; fi
-            case $choice in
-                "y") break;;
-                "n") exit 0;;
-                "Y") break;;
-                "N") exit 0;;
-            esac
-        done
-    fi
-fi
+notify() {
+	echo "Notification: $*"
+	[[ "$gui" ]] && {
+		case $gui in
+			kdialog) kdialog --title "Screenshot saved" --passivepopup="$*";;
+			zenity) zenity --notification --text="$*";;
+		esac
+	}
+}
 
-# Check if the directory is valid
-if ! [ -e "$dirpath" ]; then
-    echo "Screenshot directory does not exist!"
-    exit 2
-fi
+[[ "$sleep" == 0 ]] && {
+	warn "Using the refresh rate of 0 seconds is too resource intensive. Exiting."
+	exit 4
+}
 
-# If the screenshots sub-directory doesn't exist, create it
-if ! [ -d "$dirpath/Screenshots" ]; then mkdir "$dirpath/Screenshots"; fi
+[[ ! -d "$rawdir" ]] && {
+	warn "Screenshot directory doesn't exist, or is a file."/
+	exit 2
+}
 
-# TODO: loop through existing screenshots to put them in the directory as well
+[[ ! -d "$screenpath" ]] && mkdir "$screenpath"
+[[ ! -e "$screenpath/.lastcheck" ]] && touch "$screenpath/.lastcheck"
 
-# Create initial lastcheck file
-if ! [ -e "$dirpath/Screenshots/.lastcheck" ]; then touch "$dirpath/Screenshots/.lastcheck"; fi
-
-# The actual loop
 while true; do
-    # Create a folder for the current date and month, if necesary 
-    if ! [ -e "$dirpath/Screenshots/$(date +%Y-%m)" ] 
-    then 
-        mkdir "$dirpath/Screenshots/$(date +%Y-%m)" 
-    fi
-    # Get last screenshot number 
-    number="$(find $dirpath/Screenshots -type f -printf '%T@ %p\n' | sort -n | cut -f2- -d' ' | grep '_' | tail -n1 | cut -f2 -d'_' | cut -f1 -d'.')"
-	if [ -z "$number" ]; then number="0"; fi
-    # Watch for new files
-    for file in "$dirpath/"*; do
-        if ! [ "$file" = "Screenshots" ] && ! [ -d "$file" ]; then
-            # Get file extention
-            extention="${file##*.}"
-            # Move the file
-            if [ "$(find "$file" -cnewer "$dirpath/Screenshots/.lastcheck")" ]; then
-				(( number++ ))
-                mv "$file" "$dirpath/Screenshots/$(date +%Y-%m)/Screenshot_$number.$extention"
-				# Copy to clipboard (requires xclip)
-				if [ -x "$(command -v xclip)" ]; then
-					xclip -selection clipboard -t image/"$extention" -i "$dirpath"/Screenshots/"$(date +%Y-%m)"/Screenshot_"$number"."$extention" 
-				fi
-                # Show notification (or echo to the command line, depending on command availability)
-                if [ -x "$(command -v kdialog)" ]; then 
-                    kdialog --title "Screenshot saved!" --passivepopup "Saved as Screenshot_$number.$extention." 3
-                elif [ -x "$(command -v zenity)" ]; then 
-                    zenity --notification --text="Saved as Screenshot_$number.$extention."
-                else
-                    echo 'Photo saved.'
-                fi
-            fi
-        fi
-    done
-    # Update last check file
-    touch "$dirpath/Screenshots/.lastcheck"
-    # Wait before refresh
-    sleep "$secsleep"
+	date="$(date +%Y-%m)"
+	[[ ! -e "$screenpath/$date" ]] && mkdir "$screenpath/$date"
+	number="$(find $screenpath -type f -printf '%T@ %p\n' | sort -n | cut -f2- -d' ' | grep '_' | tail -n1 | cut -f2 -d'_' | cut -f1 -d'.')"
+	[[ -z "$number" ]] && number="0"
+	for file in "$rawdir/"*; do
+		[[ ! -d "$file" ]] && [[ "$(find $file -cnewer $screenpath/.lastcheck)" ]] && {
+			(( number++ ))
+			extention="${file##*.}"
+			mv "$file" "$screenpath/$date/Screenshot_$number.$extention"
+			command -v xclip &>/dev/null && xclip -selection clipboard -t "image/$extention" -e "$screenpath/$date/Screenshot_$number.$extention"
+			notify "Screenshot saved as Screenshot_$number.$extention." &
+		}
+	done
+	touch "$screenpath/.lastcheck"
+	sleep "$sleep"
 done

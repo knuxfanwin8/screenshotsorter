@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -x
 usage="sorter.sh (refresh rate in seconds) (screenshot directory)"
 
 [[ -z "$1" ]] && echo "Usage: $usage" / exit 1
@@ -53,7 +53,7 @@ while true; do
 			(( number++ ))
 			extention="${file##*.}"
 			mv "$file" "$screenpath/$date/Screenshot_$number.$extention"
-			command -v xclip &>/dev/null && xclip -selection clipboard -t "image/$extention" -e "$screenpath/$date/Screenshot_$number.$extention"
+			xclip -selection clipboard -t "image/$extention" "$screenpath/$date/Screenshot_$number.$extention"
 			notify "Screenshot saved as Screenshot_$number.$extention." &
 		}
 	done
